@@ -1,0 +1,36 @@
+snl.nl_groups = 1;
+disconnect USB-to-COM device and reconnect it once:
+    root@maemo-desktop:/mnt/hgfs/VMware_share/mycode/netlink# ./hotplug
+    test errno: Success
+    remove@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0/ttyUSB0/tty/ttyUSB0
+    remove@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0/ttyUSB0
+    remove@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0
+    remove@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1
+    add@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1
+    add@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0
+    add@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0/ttyUSB0
+    add@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0/ttyUSB0/tty/ttyUSB0
+
+
+
+
+snl.nl_groups = 3;
+disconnect USB-to-COM device and reconnect it once:
+    root@maemo-desktop:/mnt/hgfs/VMware_share/mycode/netlink# ./hotplug
+    test errno: Success
+    remove@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0/ttyUSB0/tty/ttyUSB0
+    remove@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0/ttyUSB0
+    remove@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0
+    remove@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1
+    libudev
+    libudev
+    libudev
+    libudev
+    add@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1
+    add@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0
+    add@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0/ttyUSB0
+    add@/devices/pci0000:00/0000:00:11.0/0000:02:00.0/usb2/2-2/2-2.1/2-2.1:1.0/ttyUSB0/tty/ttyUSB0
+    libudev
+    libudev
+    libudev
+    libudev
