@@ -73,6 +73,7 @@ static int __init hello_init(void)
 	                         struct mutex *cb_mutex, struct module *module) */
     //unit=NETLINK_USER: refer to some kernel examples
     //groups = 0, unicast
+    //nl_sk: global sock, will be sent to hello_nl_recv_msg as argument (nl_sk ->...-> skb) and return from below func, by Tom Xue, not totally verified
     nl_sk=netlink_kernel_create(&init_net, NETLINK_USER, 0, hello_nl_recv_msg, NULL, THIS_MODULE);
     if(!nl_sk)
     {
