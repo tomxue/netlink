@@ -1,22 +1,55 @@
+/*
+ * =====================================================================================
+ *
+ *       Filename:  gpio_interrupt.c
+ *
+ *    Description:  basic interrupt trial program
+ *
+ *        Version:  1.0
+ *        Created:  11/27/11 10:04:25
+ *       Revision:  none
+ *       Compiler:  gcc
+ *       Platform:  BB-xM-RevC, Ubuntu 3.0.4-x3
+ *
+ *         Author:  Tom Xue (), tom.xue@nokia.com
+ *        Company:  Nokia
+ *
+ * =====================================================================================
+ */
 #include <linux/module.h>
+#include <linux/init.h>
+#include <linux/kernel.h>
+
+#include <linux/interrupt.h> //request_irq 
+#include <linux/gpio.h>	//OMAP_GPIO_IRQ
+#include <plat/mux.h>	//omap_cfg_reg
+#include <linux/irq.h>	//IRQ_TYPE_LEVEL_LOW
+
 #include <net/sock.h>
 #include <linux/netlink.h>
 #include <linux/skbuff.h>
+
 
 #define NETLINK_USER 31     //the user defined channel, the key factor
 
 struct sock *nl_sk = NULL;
 
+MODULE_LICENSE("GPL");
+
+//MMC2_DAT6, P9-pin5, system default GPIO input with pullup
+#define OMAP3_GPIO138          (138)
+int irq;
+struct nlmsghdr *nlh;
+int pid;
+struct sk_buff *skb_out;
+int msg_size;
+char *msg="shutdown";
+int res;
+
 static void hello_nl_recv_msg(struct sk_buff *skb) 
 {
-    struct nlmsghdr *nlh;
-    int pid;
-    struct sk_buff *skb_out;
-    int msg_size;
-    char *msg="shutdown";
-    int res;
-
-    printk(KERN_INFO "Entering: %s\n", __FUNCTION__);
+   
+    printk(KERN_ALERT "Entering: %s\n", __FUNCTION__);
 
     msg_size=strlen(msg);
     //for receiving...
@@ -26,8 +59,13 @@ static void hello_nl_recv_msg(struct sk_buff *skb)
 	        return (unsigned char *) nlh + NLMSG_HDRLEN;
         } 
     nlmsg_data - head of message payload */
-    printk(KERN_INFO "Netlink received msg payload: %s\n",(char*)nlmsg_data(nlh));
+    printk(KERN_ALERT "Netlink received msg payload: %s\n",(char*)nlmsg_data(nlh));
     
+}
+
+static irqreturn_t my_interrupt(){
+	printk(KERN_ALERT "my_interrupt executed!\n");
+
     //for sending...
     pid = nlh->nlmsg_pid; // Sending process port ID, will send new message back to the 'user space sender'
     
@@ -64,9 +102,34 @@ static void hello_nl_recv_msg(struct sk_buff *skb)
         printk(KERN_INFO "Error while sending bak to user\n");
 }
 
-static int __init hello_init(void) 
-{
-    printk("Entering: %s\n",__FUNCTION__);
+static int hello_init(void) {
+	int ret;
+
+	//below function: Sets the Omap MUX and PULL_DWN registers based on the table and judge 'cpu_class_is_omap1'
+	//omap_cfg_reg(OMAP3_GPIO138);
+		
+	ret = gpio_request(OMAP3_GPIO138, "OMAP3_GPIO138");
+	if(ret < 0)
+		printk(KERN_ALERT "gpio_request failed!\n");
+		
+	gpio_direction_input(OMAP3_GPIO138);	
+	
+	irq = OMAP_GPIO_IRQ(OMAP3_GPIO138);	//irq33 <-> GPIO module 5: includes gpio_138
+	printk(KERN_ALERT "OMAP_GPIO_IRQ success! The irq = %d\n", irq);
+	
+	irq_set_irq_type(irq, IRQ_TYPE_EDGE_FALLING);
+	enable_irq(gpio_to_irq(OMAP3_GPIO138));
+	
+	ret = request_irq(irq, my_interrupt, IRQF_DISABLED, "my_interrupt_proc", NULL);
+	if (ret==0)
+        printk(KERN_ALERT "request_irq success!\n");
+    else
+        printk(KERN_ALERT "request_irq fail!\n"); 
+		
+    printk(KERN_ALERT "Hello, Tom Xue! From inside kernel driver!\n");
+
+    //below is for netlink operation...
+    printk(KERN_ALERT "Entering: %s\n",__FUNCTION__);
     //struct net init_net; defined in net_namespace.c
     /* netlink_kernel_create(struct net *net, int unit, unsigned int groups, 
                              void (*input)(struct sk_buff *skb),
@@ -80,16 +143,22 @@ static int __init hello_init(void)
         printk(KERN_ALERT "Error creating socket.\n");
         return -10;
     }
+    else
+        printk(KERN_ALERT "Creating netlink successfully!\n");
 
     return 0;
 }
 
-static void __exit hello_exit(void) 
+static void hello_exit(void)
 {
+    disable_irq(irq);
+    free_irq(irq, NULL);
+    gpio_free(OMAP3_GPIO138);
+    printk(KERN_INFO "Goodbye, Tom Xue! From inside kernel driver!\n");
+
     printk(KERN_INFO "exiting hello module\n");
     netlink_kernel_release(nl_sk);
 }
 
-module_init(hello_init); 
+module_init(hello_init);
 module_exit(hello_exit);
-MODULE_LICENSE("GPL");

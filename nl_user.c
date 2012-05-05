@@ -9,6 +9,7 @@ struct nlmsghdr *nlh = NULL;
 struct iovec iov;
 int sock_fd;
 struct msghdr msg;  //msghdr includes: struct iovec *	msg_iov;
+char *magic="shutdown";
 
 void main()
 {
@@ -36,7 +37,7 @@ void main()
     nlh->nlmsg_pid = getpid();  //self pid
     nlh->nlmsg_flags = 0;
 
-    strcpy(NLMSG_DATA(nlh), "Hello");
+    strcpy(NLMSG_DATA(nlh), "Hello");   //put "Hello" into nlh
 
     iov.iov_base = (void *)nlh;         //iov -> nlh
     iov.iov_len = nlh->nlmsg_len;
@@ -53,5 +54,10 @@ void main()
     /* Read message from kernel */
     recvmsg(sock_fd, &msg, 0);  //msg is also receiver for read
     printf("Received message payload: %s\n", NLMSG_DATA(nlh));  //msg -> iov -> nlh
+    if(strcmp(magic, NLMSG_DATA(nlh)) == 0)
+    {
+        printf("Go to shutdown right now!\n");
+        system("halt");
+    }
     close(sock_fd);
 }
